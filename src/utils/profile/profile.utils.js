@@ -45,3 +45,19 @@ export const getProfileBookings = async(user) => {
     const data = await response.json();
     return data;
 };
+
+
+export const updateProfile = async (user, data) => {
+    const response = await fetch(`${baseUrl}holidaze/profiles/${user.data.name}`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${user.data.accessToken}`,
+        "X-Noroff-API-Key": user.apiKey, 
+        'Content-type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+  
+  
+    return await response.json();
+};

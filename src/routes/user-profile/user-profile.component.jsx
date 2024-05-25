@@ -2,12 +2,14 @@ import { useState, useEffect, Fragment} from "react";
 import { Container, Row, Col, Button, Modal, Form, Table } from "react-bootstrap";
 import styles from './user-profile.styles.module.scss';
 import { getUserStorage } from "../../lib/auth";
-import { getProfileByName, getProfileVenues, getProfileBookings } from "../../utils/profile/profile.utils";
+import { getProfileByName, getProfileVenues, getProfileBookings, updateProfile } from "../../utils/profile/profile.utils";
 import { createVenue, updateVenue, deleteVenue } from "../../utils/venues/venue.utils";
 import PaginationComponent from "../../components/pagination/pagination.component";
 import VenueComponent from "../../components/venue/venue.component";
 import { formatDate, isDateGreaterOrEqual } from "../../lib/helpers";
-
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { FaPencilAlt} from "react-icons/fa";
 
 const UserProfile = () => {
 
@@ -15,22 +17,64 @@ const UserProfile = () => {
     const [userData, setUserData] = useState(null);
     
     // below for venues 
-    const [currentPage, setCurrentPage] = useState(1);
-    const [currentLimit] = useState(10);
+    // const [currentPage, setCurrentPage] = useState(1);
+    // const [currentLimit] = useState(10);
+
+
     const [paginationMeta, setPaginationMeta] = useState(null);
     const [listOfVenues, setListOfVenues] = useState([]);
     const [upcomingBookings, setUpcomingBookings] = useState([]);
 
 
+    // below for profile data to update 
+
+    const [profileData, setProfileData] = useState({
+        avatarUrl: '',
+        avatarAlt: '',
+        bannerUrl: '', 
+        bannerAlt: '',
+        venueManager: false,
+        bio: ''
+    });
+
+    const handleChangeProfileData = (e) => {
+        const { name, value, type } = e.target;
+        if(type === 'checkbox') {
+            setProfileData({ ...profileData, [name]: !profileData.venueManager });
+        } else {
+            setProfileData({ ...profileData, [name]: value });
+        }
+    };
+
+    const [isShowProfileEdit, setIsShowProfileEdit] = useState(false);
+    const handleCloseProfile = () => {
+        setIsShowProfileEdit(false);
+    }
+    const handleShowProfile = () => setIsShowProfileEdit(true);
+
+
     useEffect(() => {
         const user = getUserStorage();
         const getUserProfileAndVenuesAndBookings = async() => {
-            const userProfile = await getProfileByName(user);
-
             
+            const userProfile = await getProfileByName(user);
             setUserData(userProfile.data);
+
+            //console.log('user profile data ', userProfile.data);
+
+            const profileDataObj = {
+                avatarUrl: userProfile.data.avatar.url,
+                avatarAlt: userProfile.data.avatar.alt,
+                bannerUrl: userProfile.data.banner.url, 
+                bannerAlt: userProfile.data.banner.alt,
+                venueManager: userProfile.data.venueManager,
+                bio: userProfile.data.bio
+            };
+
+            setProfileData(profileDataObj);
+           
+
             const userVenues = await getProfileVenues(user);
-         
             setListOfVenues(userVenues.data);
             
             const data = {
@@ -63,16 +107,16 @@ const UserProfile = () => {
 
     const handlePageChange = (pageNumber) => {
   
-        setCurrentPage(pageNumber);
+        //setCurrentPage(pageNumber);
         setPaginationMeta((prevMeta) => ({
-          ...prevMeta,
-          currentPage: pageNumber,
-          isFirstPage: pageNumber === 1,
-          isLastPage: pageNumber === prevMeta.pageCount,
-          nextPage: pageNumber < prevMeta.pageCount ? pageNumber + 1 : prevMeta.pageCount,
-          previousPage: pageNumber > 1 ? pageNumber - 1 : 1,
+            ...prevMeta,
+            currentPage: pageNumber,
+            isFirstPage: pageNumber === 1,
+            isLastPage: pageNumber === prevMeta.pageCount,
+            nextPage: pageNumber < prevMeta.pageCount ? pageNumber + 1 : prevMeta.pageCount,
+            previousPage: pageNumber > 1 ? pageNumber - 1 : 1,
         }));
-      };
+    };
 
 
 
@@ -132,8 +176,10 @@ const UserProfile = () => {
 
         if(idToEdit) {
             await updateVenue(user, dataToPass, idToEdit);
+            toast('Updated');
         } else {
             await createVenue(user, dataToPass);
+            toast('Created');
         }
 
         setTrigger(!trigger);
@@ -160,11 +206,37 @@ const UserProfile = () => {
         try {
             await deleteVenue(user, id);
             setTrigger(!trigger);
+            toast('Deleted');
         } catch(error) {
             console.log('there is error');
         }
       
-    }
+    };
+
+
+    //console.log('profile data is ', profileData);
+
+    const handleUpdate = async(evt) => {
+        evt.preventDefault();
+        const user = getUserStorage();
+        const data = {
+            "avatar": {
+              "url": profileData.avatarUrl,
+              "alt": profileData.avatarAlt
+            },
+            "banner": {
+              "url": profileData.bannerUrl,
+              "alt": profileData.bannerAlt
+            },
+            "venueManager": profileData.venueManager,
+            "bio": profileData.bio
+        };
+
+        await updateProfile(user, data);
+        setTrigger(!trigger);
+        toast('Updated Profile');
+        handleCloseProfile();
+    };  
 
     return (
         <Fragment>
@@ -178,12 +250,13 @@ const UserProfile = () => {
                                 <div className="col-md-6 mx-auto">
                                     <div className="text-center">
                                         <img src={userData.avatar.url} alt={userData.avatar.banner} className={styles.avatar} />
+                                        <p className={styles.whiteEdit} onClick={() => handleShowProfile()}><FaPencilAlt></FaPencilAlt> Edit</p>
                                         <h2 className={styles.white}>Name: {userData.name}</h2>
                                         <p className={`${styles.white} mb-1`}>Email: {userData.email}</p>
                                         <p className={styles.white}>Bio: {userData.bio}</p>
 
                                         <h3 className={styles.white}>Bookings: {userData._count.bookings}</h3>
-                                        <h3 className={styles.white}>Venues: {userData._count.venues}</h3>
+                                        <h3 className={styles.whiteEdit}>Venues: {userData._count.venues}</h3>
 
                                         { userData.venueManager &&
                                             <Button className="mt-3" variant="primary" onClick={handleShow}>Add Venue</Button>
@@ -277,7 +350,7 @@ const UserProfile = () => {
             <Modal show={isShow} onHide={handleClose} size="lg">
                 <form onSubmit={handleSubmit}>
                     <Modal.Header>
-                        <Modal.Title>Add Venue</Modal.Title>
+                        <Modal.Title>{idToEdit ? 'Update Venue' : 'Add Venue'}</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
                         {/* below is for the form */}
@@ -524,6 +597,95 @@ const UserProfile = () => {
 
                 </form>
             </Modal>
+
+            <Modal show={isShowProfileEdit} onHide={handleCloseProfile} size="lg">
+                <form onSubmit={handleUpdate}>
+                    <Modal.Header>
+                        <Modal.Title>Update Profile</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        {/* below is for the form */}
+                    
+                        <Form.Group as={Col} controlId="avatarUrl">
+                            <Form.Label>Avatary Url</Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="avatarUrl"
+                                value={profileData.avatarUrl}
+                                onChange={handleChangeProfileData}
+                                required
+                            />
+                        </Form.Group>
+
+                        <Form.Group as={Col} controlId="avatarAlt">
+                            <Form.Label>Avatar Alt</Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="avatarAlt"
+                                value={profileData.avatarAlt}
+                                onChange={handleChangeProfileData}
+                                required
+                            />
+                        </Form.Group>
+
+                        <Form.Group as={Col} controlId="bannerUrl">
+                            <Form.Label>Banner Url</Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="bannerUrl"
+                                value={profileData.bannerUrl}
+                                onChange={handleChangeProfileData}
+                                required
+                            />
+                        </Form.Group>
+
+                        <Form.Group as={Col} controlId="bannerAlt">
+                            <Form.Label>Banner Alt</Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="bannerAlt"
+                                value={profileData.bannerAlt}
+                                onChange={handleChangeProfileData}
+                                required
+                            />
+                        </Form.Group>
+
+                        <Form.Group as={Col} controlId="bannerAlt">
+                            <Form.Label>Bio</Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="bio"
+                                value={profileData.bio}
+                                onChange={handleChangeProfileData}
+                                required
+                            />
+                        </Form.Group>
+
+                        <Form.Check
+                            checked={profileData.venueManager}
+                            type="checkbox"
+                            name="venueManager"
+                            id="venueManager"
+                            onChange={handleChangeProfileData}
+                        />
+
+                        {/* below is end the form */}
+
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={handleCloseProfile}>
+                            Close
+                        </Button>
+                        <Button type="submit" variant="primary">
+                            Save Changes
+                        </Button>
+                    </Modal.Footer>
+
+                </form>
+            </Modal>
+                            
+            <ToastContainer />
+
         </Fragment>
     )
 };
