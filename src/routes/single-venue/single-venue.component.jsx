@@ -8,7 +8,9 @@ import { getUserStorage } from "../../lib/auth";
 const SingleVenue = () => {
 
 
-    const [show, setShow] = useState(false);
+
+    const [show] = useState(false);
+    const [trigger, setTrigger] = useState(false);
 
     const { id } = useParams();
     const [currentVenue, setCurrentVenue] = useState(null);
@@ -30,7 +32,7 @@ const SingleVenue = () => {
 
         getVenue();
 
-    },[]);
+    },[trigger]);
 
 
     return(
@@ -40,7 +42,7 @@ const SingleVenue = () => {
                     <Col>   
                         {
                             currentVenue && 
-                            <VenueComponent data={currentVenue} showEditDelete={show} />
+                            <VenueComponent data={currentVenue} showEditDelete={show} showCalendar={true} setTrigger={setTrigger} trigger={trigger}/>
                         }
 
                         {

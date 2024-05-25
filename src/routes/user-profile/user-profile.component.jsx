@@ -2,10 +2,11 @@ import { useState, useEffect, Fragment} from "react";
 import { Container, Row, Col, Button, Modal, Form, Table } from "react-bootstrap";
 import styles from './user-profile.styles.module.scss';
 import { getUserStorage } from "../../lib/auth";
-import { getProfileByName, getProfileVenues } from "../../utils/profile/profile.utils";
+import { getProfileByName, getProfileVenues, getProfileBookings } from "../../utils/profile/profile.utils";
 import { createVenue, updateVenue, deleteVenue } from "../../utils/venues/venue.utils";
 import PaginationComponent from "../../components/pagination/pagination.component";
 import VenueComponent from "../../components/venue/venue.component";
+import { formatDate, isDateGreaterOrEqual } from "../../lib/helpers";
 
 
 const UserProfile = () => {
@@ -18,16 +19,20 @@ const UserProfile = () => {
     const [currentLimit] = useState(10);
     const [paginationMeta, setPaginationMeta] = useState(null);
     const [listOfVenues, setListOfVenues] = useState([]);
+    const [upcomingBookings, setUpcomingBookings] = useState([]);
 
 
     useEffect(() => {
         const user = getUserStorage();
         const getUserProfileAndVenuesAndBookings = async() => {
             const userProfile = await getProfileByName(user);
+
+            
             setUserData(userProfile.data);
             const userVenues = await getProfileVenues(user);
          
             setListOfVenues(userVenues.data);
+            
             const data = {
                 currentPage: userVenues.meta.currentPage,
                 isFirstPage: userVenues.meta.isFirstPage,
@@ -36,10 +41,22 @@ const UserProfile = () => {
                 pageCount: userVenues.meta.pageCount,
                 previousPage: userVenues.meta.previousPage,
                 totalCount: userVenues.meta.totalCount
-              };
+            };
             setPaginationMeta(data);
 
+            const userBookings = await getProfileBookings(user);
+            const userBookingsData = userBookings.data;
+
+            const filtered = userBookingsData.filter((el, index) => {
+                if(isDateGreaterOrEqual(el.dateFrom)) {
+                    return el;
+                }   
+            });
+
+           
+            setUpcomingBookings(filtered);
         };
+
         getUserProfileAndVenuesAndBookings();
 
     }, [trigger]);
@@ -176,16 +193,54 @@ const UserProfile = () => {
                                 </div>
                             </div>
 
-                          
-
 
                         </div>
+
+
+                        <Container>
+                            <Row>
+                                <Col>
+                                    <h2 className={`${styles.white} mt-3 mb-3`}>Upcoming Bookings</h2>
+                                    <Table responsive>
+                                        <thead>
+                                        <tr>
+                                           
+                                            <th>Date From</th>
+                                            <th>Date To</th>
+                                            <th>Venue</th>
+                                            <th>Guests</th>
+                                            <th>Price</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                       
+                                        { 
+                                            upcomingBookings && upcomingBookings.map((el, index) => {
+                                                return (
+                                                    <tr key={index}>
+                                                        
+                                                        <td>{formatDate(el.dateFrom)}</td>
+                                                        <td>{formatDate(el.dateTo)}</td>
+                                                        <td>{el.venue.name}</td>
+                                                        <td>{el.guests}</td>
+                                                        <td>{el.venue.price} NOK</td>
+                                                    </tr>
+                                                )
+                                            })
+                                        }
+                                    
+                                    
+                                        </tbody>
+                                    </Table>
+                                </Col>
+                            </Row>
+                        </Container>
 
                         { listOfVenues.length &&
                             <Container>
                                 <Row>
                                     <Col>
-                                        <h2 className={`${styles.white} mt-3 mb-3`}>Venues</h2>
+                                        <h2 className={`${styles.white} mt-3 mb-3`}>My Venues</h2>
                                         
                                         {
                                             listOfVenues.map((el, index) => {

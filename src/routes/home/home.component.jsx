@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Container, Row, Col, Button } from "react-bootstrap";
+import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from './home.styles.module.scss';
 import { fetchVenues } from "../../utils/venues/venue.utils";
 import PaginationComponent from "../../components/pagination/pagination.component";
@@ -19,6 +19,7 @@ const Home = () => {
   useEffect(() => {
     const getVenues = async() => {
       const venues = await fetchVenues(currentLimit, currentPage);
+      console.log(venues.data);
       setListOfVenues(venues.data);
       const data = {
         currentPage: venues.meta.currentPage,
@@ -57,6 +58,11 @@ const Home = () => {
 
             <div className={styles.venueItemsContainer}>
               <h1 className="mb-5">List Of Venues</h1>
+
+              <Form.Group className="mb-3 mt-5" controlId="numGuests">
+                <Form.Label>Search Venues</Form.Label>
+                <Form.Control type="text" name="numGuests" />
+              </Form.Group>
               {
                 listOfVenues.map((el, index) => {
                   return(

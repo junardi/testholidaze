@@ -16,13 +16,31 @@ export const getProfileByName = async(user) => {
 
 export const getProfileVenues = async(user) => {
 
-    const response = await fetch(`${baseUrl}holidaze/profiles/${user.data.name}/venues`, {
+    const response = await fetch(`${baseUrl}holidaze/profiles/${user.data.name}/venues?_bookings=true`, {
         method: "GET",
         headers: {
             Authorization: `Bearer ${user.data.accessToken}`,
             "X-Noroff-API-Key": user.apiKey
         },
     });
+
+
+
+    const data = await response.json();
+    return data;
+};
+
+export const getProfileBookings = async(user) => {
+
+    const response = await fetch(`${baseUrl}holidaze/profiles/${user.data.name}/bookings?_venue=true`, {
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${user.data.accessToken}`,
+            "X-Noroff-API-Key": user.apiKey
+        },
+    });
+
+      
 
     const data = await response.json();
     return data;

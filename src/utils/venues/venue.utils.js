@@ -1,7 +1,7 @@
 const baseUrl = "https://v2.api.noroff.dev/";
 
 export const fetchVenues = async(limit, page) => {
-  const response = await fetch(`${baseUrl}holidaze/venues?limit=${limit}&page=${page}`, {
+  const response = await fetch(`${baseUrl}holidaze/venues?limit=${limit}&page=${page}&_bookings=true`, {
     method: "GET",
   });
 
@@ -55,7 +55,7 @@ export const deleteVenue = async (user, id) => {
 };
 
 export const getVenueById = async(id) => {
-  const response = await fetch(`${baseUrl}holidaze/venues/${id}`, {
+  const response = await fetch(`${baseUrl}holidaze/venues/${id}?_bookings=true`, {
     method: "GET",
   });
 
@@ -63,6 +63,21 @@ export const getVenueById = async(id) => {
   return data;
 };
 
+
+export const createBookingInAVenue = async (user, data) => {
+  const response = await fetch(`${baseUrl}holidaze/bookings`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${user.data.accessToken}`,
+      "X-Noroff-API-Key": user.apiKey, 
+      'Content-type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  });
+
+
+  return await response.json();
+};
 
 
 
