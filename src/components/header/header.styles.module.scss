@@ -10,6 +10,10 @@
     .navbarBrand {
         color: #FFFFFF;
         font-size: 2rem;
+
+        @media (max-width: 991px) {
+            font-size: 1.8rem;
+        }
     }
 
     .customNavbar {

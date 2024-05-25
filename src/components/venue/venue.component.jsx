@@ -168,8 +168,6 @@ const VenueComponent = ({data, showEditDelete, showView, setEdit, setDelete, sho
 
     const [calendarKey, setCalendarKey] = useState(1);
     const clearSelection = () => {
-
-        console.log('lets clear selection');
         setIsRange(false);
         onChange(null);
         setMinDate(new Date(Date.now() + 86400000));

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
 import styles from './home.styles.module.scss';
-import { fetchVenues } from "../../utils/venues/venue.utils";
+import { fetchVenues, searchVenues } from "../../utils/venues/venue.utils";
 import PaginationComponent from "../../components/pagination/pagination.component";
 import VenueComponent from "../../components/venue/venue.component";
 
@@ -19,7 +19,6 @@ const Home = () => {
   useEffect(() => {
     const getVenues = async() => {
       const venues = await fetchVenues(currentLimit, currentPage);
-      console.log(venues.data);
       setListOfVenues(venues.data);
       const data = {
         currentPage: venues.meta.currentPage,
@@ -49,6 +48,73 @@ const Home = () => {
     }));
   };
 
+  const [inputValue, setInputValue] = useState('');
+  const [debouncedValue, setDebouncedValue] = useState(inputValue);
+  const [typed, setTyped] = useState(false);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(inputValue);
+    }, 2000);
+
+    return () => {
+        clearTimeout(handler);
+    };
+  }, [inputValue]); 
+
+  useEffect(() => {
+
+    const callSearch = async() => {
+      if (debouncedValue) {
+        console.log('User stopped typing. Debounced value:', debouncedValue);
+       
+        if(!typed) {
+          setTyped(true);
+        }
+
+        const venues = await searchVenues(currentLimit, currentPage, debouncedValue);
+
+        console.log('searched is ', venues);
+        setListOfVenues(venues.data);
+        const data = {
+          currentPage: venues.meta.currentPage,
+          isFirstPage: venues.meta.isFirstPage,
+          isLastPage: venues.meta.isLastPage,
+          nextPage: venues.meta.nextPage,
+          pageCount: venues.meta.pageCount,
+          previousPage: venues.meta.previousPage,
+          totalCount: venues.meta.totalCount
+        };
+        setPaginationMeta(data);
+        // Place your function or API call here
+      } else {
+        if(typed) {
+          console.log('Empty ', debouncedValue);
+          const venues = await fetchVenues(currentLimit, currentPage);
+          setListOfVenues(venues.data);
+          const data = {
+            currentPage: venues.meta.currentPage,
+            isFirstPage: venues.meta.isFirstPage,
+            isLastPage: venues.meta.isLastPage,
+            nextPage: venues.meta.nextPage,
+            pageCount: venues.meta.pageCount,
+            previousPage: venues.meta.previousPage,
+            totalCount: venues.meta.totalCount
+          };
+          setPaginationMeta(data);
+        }
+      
+      }
+    };
+
+    callSearch();
+   
+  }, [debouncedValue]);
+
+  const handleChange = (event) => {
+    setInputValue(event.target.value);
+  };
+
 
   return (
     <div className={`${styles.home} mainPage`}>
@@ -61,7 +127,7 @@ const Home = () => {
 
               <Form.Group className="mb-3 mt-5" controlId="numGuests">
                 <Form.Label>Search Venues</Form.Label>
-                <Form.Control type="text" name="numGuests" />
+                <Form.Control type="text" name="numGuests" onChange={handleChange} />
               </Form.Group>
               {
                 listOfVenues.map((el, index) => {

@@ -10,6 +10,17 @@ export const fetchVenues = async(limit, page) => {
 };
 
 
+export const searchVenues = async(limit, page, q) => {
+
+
+  const response = await fetch(`${baseUrl}holidaze/venues/search?limit=${limit}&page=${page}&_bookings=true&q=${q}`, {
+    method: "GET",
+  });
+
+  const data = await response.json();
+  return data;
+};
+
 
 export const createVenue = async (user, data) => {
   const response = await fetch(`${baseUrl}holidaze/venues`, {
