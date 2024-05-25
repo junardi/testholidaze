@@ -1,0 +1,26 @@
+.register {
+    background-color: #fff;
+    width: 40%;
+    margin: 80px auto;
+    border-radius: 10px;
+    padding: 20px;
+    border-left: 5px solid #009688;
+    box-shadow: 0px 0px 0px 0px #545558;
+}
+
+.register>.row>h2 {
+    margin: auto;
+}
+
+.checkboxContainer {
+
+    margin-bottom: 14px;
+    label {
+        margin-right: 10px;
+    }
+}
+
+.btnForm {
+    width: 100%;
+    margin-top: 20px;
+}
