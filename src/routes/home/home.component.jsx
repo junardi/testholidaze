@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Container, Row, Col, Button, Form } from "react-bootstrap";
+import { Container, Row, Col, Form } from "react-bootstrap";
 import styles from './home.styles.module.scss';
 import { fetchVenues, searchVenues } from "../../utils/venues/venue.utils";
 import PaginationComponent from "../../components/pagination/pagination.component";
@@ -33,7 +33,7 @@ const Home = () => {
     }; 
 
     getVenues();
-  }, [currentPage]); 
+  }, [currentPage, currentLimit]); 
 
   const handlePageChange = (pageNumber) => {
   
@@ -109,7 +109,7 @@ const Home = () => {
 
     callSearch();
    
-  }, [debouncedValue]);
+  }, [debouncedValue, currentLimit, currentPage, typed]);
 
   const handleChange = (event) => {
     setInputValue(event.target.value);

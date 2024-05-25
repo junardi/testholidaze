@@ -63,6 +63,8 @@ export const deleteVenue = async (user, id) => {
     }
   });
 
+  console.log(response);
+
 };
 
 export const getVenueById = async(id) => {

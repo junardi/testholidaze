@@ -90,7 +90,7 @@ const VenueComponent = ({data, showEditDelete, showView, setEdit, setDelete, sho
 
             console.log('the value is array');
             
-            if(val.length == 1) {
+            if(val.length === 1) {
       
               if(currentBookingDates && currentBookingDates.length) {
               
@@ -108,18 +108,18 @@ const VenueComponent = ({data, showEditDelete, showView, setEdit, setDelete, sho
                 
         
                   setMaxDate(copyDate);
-                } else if(diffInDays == 1) {
+                } else if(diffInDays === 1) {
         
                   
                   setMaxDate(val[0]);
-                } else if(diffInDays == 0) {
+                } else if(diffInDays === 0) {
                   setMaxDate(val[0]);
                 }
         
               }
             
               setMinDate(val[0]);
-            } else if(val.length == 2) {
+            } else if(val.length === 2) {
               setMinDate(val[0]);
             }
       
@@ -146,10 +146,10 @@ const VenueComponent = ({data, showEditDelete, showView, setEdit, setDelete, sho
                 
       
                 setMaxDate(copyDate);
-              } else if(diffInDays == 1) {
+              } else if(diffInDays === 1) {
     
                 setMaxDate(val);
-              } else if (diffInDays == 0) {
+              } else if (diffInDays === 0) {
                 setMaxDate(val);
               }
       

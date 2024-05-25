@@ -90,7 +90,7 @@ const UserProfile = () => {
 
             const userBookings = await getProfileBookings(user);
             const userBookingsData = userBookings.data;
-
+            // eslint-disable-next-line
             const filtered = userBookingsData.filter((el, index) => {
                 if(isDateGreaterOrEqual(el.dateFrom)) {
                     return el;
@@ -190,6 +190,8 @@ const UserProfile = () => {
     const [idToEdit, setIdToEdit] = useState(null);
     const setEdit = (data) => {
         const { id, created, updated, _count, ...dataNoId } = data;
+
+        console.log(dataNoId);
         setIdToEdit(id);
         setFormData(data);
         setIsShow(true);

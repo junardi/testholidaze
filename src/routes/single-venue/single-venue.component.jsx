@@ -3,11 +3,8 @@ import { useState, useEffect } from "react";
 import VenueComponent from "../../components/venue/venue.component";
 import { getVenueById } from "../../utils/venues/venue.utils";
 import { useParams } from "react-router-dom";
-import { getUserStorage } from "../../lib/auth";
 
 const SingleVenue = () => {
-
-
 
     const [show] = useState(false);
     const [trigger, setTrigger] = useState(false);
@@ -32,7 +29,7 @@ const SingleVenue = () => {
 
         getVenue();
 
-    },[trigger]);
+    },[trigger, id]);
 
 
     return(
